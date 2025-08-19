@@ -1,0 +1,52 @@
+name:  Configuration ansible.cfg 
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-ansible-cfg:
+    runs-on: [ ansible-master ]
+
+    steps:
+
+
+      - name: Generate ansible.cfg
+        run: |
+          sudo -u ralph bash -c 'cat > /home/ralph/ansible/ansible.cfg' << 'EOF'
+          [defaults]
+          inventory      = /home/ralph/ansible/inventory.yaml
+          roles_path    = /home/ralph/ansible/roles
+          host_key_checking = False
+          remote_user = ralph
+          private_key_file = /home/ralph/.ssh/id_rsa
+          log_path = /home/ralph/ansible/ansible.log
+          forks = 5
+          gathering = smart
+          fact_caching = jsonfile
+          fact_caching_connection = /home/ralph/ansible/facts_cache
+          
+
+          [privilege_escalation]
+          become = True
+          become_method = sudo
+          become_user = root
+          become_ask_pass = False
+
+          [ssh_connection]
+          ssh_args = -o ControlMaster=auto -o ControlPersist=60s -o ConnectTimeout=10
+          control_path = /home/ralph/.ssh/id_rsa-%%r@%%h:%%p
+          EOF
+          
+
+      - name: Set proper permissions
+        run: |
+          sudo chown ralph:ralph /home/ralph/ansible/ansible.cfg
+          sudo chmod 644 /home/ralph/ansible/ansible.cfg
+
+      - name: Verify configuration
+        run: |
+          echo "Ansible configuration:"
+          sudo -u ralph ls -la /home/ralph/ansible/ansible.cfg
+          echo -e "\nContents:"
+          sudo -u ralph cat /home/ralph/ansible/ansible.cfg
+
