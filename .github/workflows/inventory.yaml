@@ -29,7 +29,7 @@ jobs:
               databases:
                 hosts:
                   db01:
-                    ansible_host: 10.204.0.2
+                    ansible_host: 10.140.0.4
                     ansible_user: ralph
                     db_version: 14
                    
